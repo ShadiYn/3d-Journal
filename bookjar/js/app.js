@@ -20,8 +20,9 @@ function initScene() {
   document.getElementById('cv').innerHTML = '';
 
   sc = new THREE.Scene();
-  sc.background = new THREE.Color(0x090810);
-  sc.fog        = new THREE.FogExp2(0x090810, 0.028);
+  const _st = CASE_STYLES[currentCase];
+  sc.background = new THREE.Color(_st.bg);
+  sc.fog        = new THREE.FogExp2(_st.fog, 0.028);
 
   cam = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.1, 80);
   cam.position.set(0.4, 3.8, 11.8);
@@ -55,7 +56,7 @@ function initScene() {
 
 function loadBooks() {
   books = [];
-  const saved = gbk(CU);
+  const saved = gbk(CU, currentCase);
   if (!saved.length) return;
 
   saved.forEach(d => books.push({ ...d, mesh: null, jarPos: null, jarRot: null }));
@@ -78,6 +79,7 @@ function loadBooks() {
 
   updStats();
   markShadowDirty();
+  recheckUnlocks();  // detectar desbloqueos pendientes al cargar
 }
 
 // ── tick ──────────────────────────────────────────

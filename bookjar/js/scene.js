@@ -34,10 +34,13 @@ function mkFloor() {
 // ── Estantería ─────────────────────────────────────
 
 function mkShelf() {
+  if (shelfGroup) { sc.remove(shelfGroup); shelfGroup = null; }
+
+  const st  = CASE_STYLES[currentCase];
   const g   = new THREE.Group();
-  const wm  = new THREE.MeshLambertMaterial({ color: 0x3e2309 });
-  const dm  = new THREE.MeshLambertMaterial({ color: 0x2a1706 });
-  const bkm = new THREE.MeshLambertMaterial({ color: 0x160c02 });
+  const wm  = new THREE.MeshLambertMaterial({ color: st.wood });
+  const dm  = new THREE.MeshLambertMaterial({ color: st.dark });
+  const bkm = new THREE.MeshLambertMaterial({ color: st.back });
   [
     [-0.57,                  SW + 0.08, SD + 0.07, 0.10, dm],
     [SHELF_TOPS[0] - PT / 2, SW,        SD,         PT,   wm],
@@ -59,10 +62,11 @@ function mkShelf() {
   SHELF_TOPS.forEach(y => {
     const trim = new THREE.Mesh(
       new THREE.BoxGeometry(SW, PT * 0.6, 0.06),
-      new THREE.MeshLambertMaterial({ color: 0x4e2c0c })
+      new THREE.MeshLambertMaterial({ color: st.trim })
     );
     trim.position.set(0, y + PT * 0.3, SD / 2 + 0.03); g.add(trim);
   });
+  shelfGroup = g;
   sc.add(g);
 }
 

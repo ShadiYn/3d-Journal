@@ -63,6 +63,7 @@
     <div class="tr">
       <span class="uname" id="un"></span>
       <button class="bjar" onclick="oJarPicker()" title="Cambiar tipo de bote">🫙 Bote</button>
+      <button class="bshelves" onclick="toggleShelfPanel()" title="Mis estanterías">🗂 Estanterías</button>
       <button class="bnew" onclick="omod()">＋ Nuevo libro</button>
       <button class="bgh"  onclick="dout()">Salir</button>
     </div>
@@ -79,6 +80,28 @@
     <div class="tstars" id="tt-s"></div>
   </div>
   <div id="toast"></div>
+
+  <!-- ════ PANEL LATERAL DE ESTANTERÍAS ════ -->
+  <div id="shelf-panel">
+    <div class="sp-header">
+      <span>🗂 Mis Estanterías</span>
+      <button class="sp-close" onclick="closeShelfPanel()">✕</button>
+    </div>
+    <div id="sp-list"></div>
+  </div>
+
+  <!-- Overlay para cerrar panel al clicar fuera -->
+  <div id="shelf-overlay" onclick="closeShelfPanel()"></div>
+
+  <!-- Banner de desbloqueo -->
+  <div id="unlock-banner">
+    <span id="ub-icon">✨</span>
+    <div class="ub-text">
+      <div class="ub-sub">¡Estantería desbloqueada!</div>
+      <div class="ub-name" id="ub-name"></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ════ MODAL NUEVO LIBRO ════ -->
@@ -298,6 +321,7 @@
 <script src="js/scene.js"></script>
 <script src="js/drag.js"></script>
 <script src="js/jar-picker.js"></script>
+<script src="js/shelf-panel.js"></script>
 <script src="js/app.js"></script>
 
 </body>
