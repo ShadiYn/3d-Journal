@@ -300,3 +300,30 @@ html, body {
   opacity: 0.7;
   letter-spacing: .3px;
 }
+
+/* ══════════════════════════════════════════════════
+   CAMPO DE PÁGINAS
+══════════════════════════════════════════════════ */
+.pgrow {
+  display: flex; align-items: center; gap: 10px; margin-top: 2px;
+}
+.pgnum { flex: 0 0 110px; }
+
+/* Barra de grosor visual */
+.pgbar {
+  flex: 1; height: 28px; border-radius: 7px;
+  background: var(--surf2); border: 1px solid var(--bd);
+  position: relative; overflow: hidden;
+  display: flex; align-items: center;
+}
+.pgfill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: linear-gradient(90deg, rgba(200,167,72,.25), rgba(200,167,72,.55));
+  border-radius: 7px; width: 0%;
+  transition: width .25s ease;
+}
+.pglbl {
+  position: relative; z-index: 1;
+  font-size: 11px; color: var(--txtd); letter-spacing: .5px;
+  padding-left: 10px; user-select: none;
+}

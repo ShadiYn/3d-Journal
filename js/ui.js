@@ -45,21 +45,41 @@ function cmod() {
 // ── Libro nuevo ────────────────────────────────────
 
 /** Recoge los datos del formulario, crea el libro y lo añade al bote */
+/**
+ * Convierte número de páginas en multiplicador de grosor (wm).
+ * 20p → muy fino (0.48) · 1200p+ → muy grueso (1.60)
+ */
+function pagesToWm(pages) {
+  const p = Math.max(20, Math.min(2000, pages || 0));
+  return Math.max(0.48, Math.min(1.60, 0.48 + (p / 1200) * 1.12));
+}
+
+/** Actualiza la barra de grosor al escribir */
+function onPg(el) {
+  const p    = parseInt(el.value, 10);
+  const fill = document.getElementById('pgfill');
+  const lbl  = document.getElementById('pglbl');
+  if (!p || p < 20) { fill.style.width = '0%'; lbl.textContent = '—'; return; }
+  fill.style.width = Math.min(100, (p / 1200) * 100) + '%';
+  lbl.textContent  = p < 150 ? 'Muy fino'
+                   : p < 350 ? 'Fino'
+                   : p < 600 ? 'Normal'
+                   : p < 900 ? 'Grueso'
+                   :           'Muy grueso';
+}
+
 function subBook() {
   const title  = document.getElementById('mt').value.trim() || 'Sin título';
   const author = document.getElementById('ma').value.trim() || 'Autor desconocido';
   const date   = document.getElementById('md').value || '';
+  const pages  = parseInt(document.getElementById('mpg').value, 10) || 0;
 
   const book = {
     id:          Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
-    title,
-    author,
-    color:       pc,
-    rating:      pr,
-    readingDate: date,
-    location:    'jar',
-    slotId:      null,
-    wm: 0.82 + Math.random() * 0.36,
+    title, author, color: pc, rating: pr, readingDate: date,
+    pages:    pages || null,
+    location: 'jar', slotId: null,
+    wm: pages >= 20 ? pagesToWm(pages) : 0.82 + Math.random() * 0.36,
     hm: 0.88 + Math.random() * 0.28,
   };
 
@@ -70,9 +90,11 @@ function subBook() {
   cmod();
   toast('"' + title + '" añadido al bote 🫙');
 
-  // Limpiar campos del formulario
-  document.getElementById('mt').value = '';
-  document.getElementById('ma').value = '';
+  document.getElementById('mt').value  = '';
+  document.getElementById('ma').value  = '';
+  document.getElementById('mpg').value = '';
+  document.getElementById('pgfill').style.width = '0%';
+  document.getElementById('pglbl').textContent  = '—';
 }
 
 // ── Persistencia ───────────────────────────────────

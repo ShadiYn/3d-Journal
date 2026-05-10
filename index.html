@@ -126,6 +126,16 @@
       </div>
     </div>
     <div class="fld">
+      <label>Número de páginas</label>
+      <div class="pgrow">
+        <input class="inp pgnum" type="number" id="mpg" placeholder="ej. 320" min="20" max="2000" oninput="onPg(this)">
+        <div class="pgbar">
+          <div class="pgfill" id="pgfill"></div>
+          <span class="pglbl" id="pglbl">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="fld">
       <label>Fecha de lectura</label>
       <input class="inp" type="date" id="md" style="color-scheme:dark">
     </div>
