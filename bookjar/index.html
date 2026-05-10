@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BookJar – Biblioteca 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+
+<!-- ════ AUTH ════ -->
+<div id="auth">
+  <div class="acard">
+    <div class="alogo">
+      <span class="brand">📚 BOOKJAR</span>
+      <span class="atag">Tu biblioteca personal en 3D</span>
+    </div>
+    <div class="atabs">
+      <button class="atab on" onclick="stab('l')">Iniciar sesión</button>
+      <button class="atab"    onclick="stab('r')">Crear cuenta</button>
+    </div>
+    <div id="pl">
+      <div class="fld">
+        <label>Usuario</label>
+        <input class="inp" id="lu" placeholder="nombre de usuario" autocomplete="username"
+               onkeydown="if(event.key==='Enter')dol()">
+      </div>
+      <div class="fld">
+        <label>Contraseña</label>
+        <input class="inp" id="lp" type="password" placeholder="••••••••" autocomplete="current-password"
+               onkeydown="if(event.key==='Enter')dol()">
+      </div>
+      <div class="errm" id="le"></div>
+      <button class="bgold" onclick="dol()">Entrar a mi biblioteca</button>
+    </div>
+    <div id="pr" style="display:none">
+      <div class="fld">
+        <label>Usuario</label>
+        <input class="inp" id="ru" placeholder="elige un nombre" autocomplete="username"
+               onkeydown="if(event.key==='Enter')dor()">
+      </div>
+      <div class="fld">
+        <label>Contraseña</label>
+        <input class="inp" id="rp" type="password" placeholder="mínimo 4 caracteres" autocomplete="new-password"
+               onkeydown="if(event.key==='Enter')dor()">
+      </div>
+      <div class="errm" id="re"></div>
+      <button class="bgold" onclick="dor()">Crear mi biblioteca</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ APP ════ -->
+<div id="app">
+  <div id="cv"></div>
+  <div class="tbar">
+    <div class="tlogo">BOOKJAR</div>
+    <div class="tr">
+      <span class="uname" id="un"></span>
+      <button class="bjar" onclick="oJarPicker()" title="Cambiar tipo de bote">🫙 Bote</button>
+      <button class="bnew" onclick="omod()">＋ Nuevo libro</button>
+      <button class="bgh"  onclick="dout()">Salir</button>
+    </div>
+  </div>
+  <div class="hint" id="hint">✦ Arrastra un libro del bote 🫙 hacia la estantería</div>
+  <div class="stats">
+    <div class="stat">Estantería: <b id="ss">0</b></div>
+    <div class="stat">En bote: <b id="sj">0</b></div>
+  </div>
+  <div id="tt">
+    <div class="ttit" id="tt-t"></div>
+    <div class="taut"  id="tt-a"></div>
+    <div class="tmeta" id="tt-m"></div>
+    <div class="tstars" id="tt-s"></div>
+  </div>
+  <div id="toast"></div>
+</div>
+
+<!-- ════ MODAL NUEVO LIBRO ════ -->
+<div class="ov" id="mo">
+  <div class="modal">
+    <button class="mcls" onclick="cmod()">✕</button>
+    <h2>✦ Nuevo libro</h2>
+    <div class="fld">
+      <label>Título</label>
+      <input class="inp" id="mt" placeholder="El título del libro">
+    </div>
+    <div class="fld">
+      <label>Autor / Autora</label>
+      <input class="inp" id="ma" placeholder="Nombre del autor">
+    </div>
+    <div class="fld">
+      <label>Color de portada</label>
+      <div class="swatches" id="sws">
+        <div class="sw sel" style="background:#c0392b" data-c="#c0392b"></div>
+        <div class="sw"     style="background:#e74c3c" data-c="#e74c3c"></div>
+        <div class="sw"     style="background:#e67e22" data-c="#e67e22"></div>
+        <div class="sw"     style="background:#d4ac0d" data-c="#d4ac0d"></div>
+        <div class="sw"     style="background:#27ae60" data-c="#27ae60"></div>
+        <div class="sw"     style="background:#1565c0" data-c="#1565c0"></div>
+        <div class="sw"     style="background:#6a1b9a" data-c="#6a1b9a"></div>
+        <div class="sw"     style="background:#00838f" data-c="#00838f"></div>
+        <div class="sw"     style="background:#4e342e" data-c="#4e342e"></div>
+        <div class="sw"     style="background:#ec407a" data-c="#ec407a"></div>
+        <div class="sw"     style="background:#2e4a26" data-c="#2e4a26"></div>
+        <div class="sw"     style="background:#1a237e" data-c="#1a237e"></div>
+      </div>
+      <div class="crow">
+        <input type="color" id="cc" value="#c0392b" oninput="oncc(this)">
+        <span>Color personalizado</span>
+      </div>
+    </div>
+    <div class="fld">
+      <label>Valoración</label>
+      <div class="srow" id="srow">
+        <span class="str on" data-v="1">★</span>
+        <span class="str on" data-v="2">★</span>
+        <span class="str on" data-v="3">★</span>
+        <span class="str"    data-v="4">★</span>
+        <span class="str"    data-v="5">★</span>
+      </div>
+    </div>
+    <div class="fld">
+      <label>Fecha de lectura</label>
+      <input class="inp" type="date" id="md" style="color-scheme:dark">
+    </div>
+    <button class="bgold" onclick="subBook()" style="margin-top:14px">Añadir al bote 🫙</button>
+  </div>
+</div>
+
+<!-- ════ MODAL SELECTOR DE BOTE ════ -->
+<div class="ov" id="jp-ov">
+  <div class="modal jp-modal">
+    <button class="mcls" onclick="cJarPicker()">✕</button>
+    <h2>🫙 Elige tu bote</h2>
+
+    <div class="jp-grid">
+
+      <!-- Cristal -->
+      <div class="jp-card" data-jar="cristal" onclick="selectJar('cristal')">
+        <div class="jp-preview">
+          <svg viewBox="0 0 80 115" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="gcr" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#99ddd0" stop-opacity="0.25"/>
+                <stop offset="45%"  stop-color="#ccf0eb" stop-opacity="0.45"/>
+                <stop offset="100%" stop-color="#99ddd0" stop-opacity="0.15"/>
+              </linearGradient>
+            </defs>
+            <!-- cuerpo -->
+            <path d="M15,20 L13,97 Q13,105 40,105 Q67,105 67,97 L65,20" fill="url(#gcr)" stroke="#99ddd0" stroke-width="2"/>
+            <!-- elipse superior -->
+            <ellipse cx="40" cy="20" rx="25" ry="7" fill="none" stroke="#aae8dd" stroke-width="2.5"/>
+            <!-- ribete -->
+            <ellipse cx="40" cy="20" rx="27" ry="8" fill="none" stroke="#99ddd0" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <!-- reflejo -->
+            <line x1="22" y1="26" x2="20" y2="90" stroke="rgba(255,255,255,0.18)" stroke-width="4" stroke-linecap="round"/>
+            <!-- libros dentro -->
+            <rect x="24" y="60" width="5"  height="20" rx="1" fill="#c0392b" opacity="0.75"/>
+            <rect x="31" y="55" width="6"  height="25" rx="1" fill="#1565c0" opacity="0.75"/>
+            <rect x="39" y="58" width="5"  height="22" rx="1" fill="#27ae60" opacity="0.75"/>
+            <rect x="46" y="52" width="7"  height="28" rx="1" fill="#d4ac0d" opacity="0.75"/>
+            <!-- fondo elipse -->
+            <ellipse cx="40" cy="97" rx="25" ry="7" fill="rgba(153,221,208,0.1)" stroke="#99ddd0" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="jp-name">Cristal</div>
+        <div class="jp-desc">Clásico y transparente</div>
+      </div>
+
+      <!-- Tarro -->
+      <div class="jp-card" data-jar="tarro" onclick="selectJar('tarro')">
+        <div class="jp-preview">
+          <svg viewBox="0 0 80 115" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="gtr" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#99ddaa" stop-opacity="0.25"/>
+                <stop offset="45%"  stop-color="#ccf0dd" stop-opacity="0.45"/>
+                <stop offset="100%" stop-color="#99ddaa" stop-opacity="0.15"/>
+              </linearGradient>
+            </defs>
+            <!-- tapa metálica -->
+            <ellipse cx="40" cy="16" rx="27" ry="7"  fill="#8ca8bc" stroke="#6a8898" stroke-width="1.5"/>
+            <rect x="13" y="16" width="54" height="9" fill="#8ca8bc" stroke="none"/>
+            <ellipse cx="40" cy="25" rx="27" ry="7"  fill="#9fbdcc" stroke="#7a9aaa" stroke-width="1.5"/>
+            <!-- franja tapa -->
+            <rect x="13" y="22" width="54" height="4" fill="rgba(255,255,255,0.15)" stroke="none"/>
+            <!-- cuerpo más ancho -->
+            <path d="M13,25 L12,95 Q12,104 40,104 Q68,104 68,95 L67,25" fill="url(#gtr)" stroke="#99ddaa" stroke-width="2"/>
+            <!-- hombro -->
+            <path d="M13,34 Q40,28 67,34" fill="none" stroke="#99ddaa" stroke-width="1.2" opacity="0.6"/>
+            <!-- reflejo -->
+            <line x1="21" y1="30" x2="19" y2="88" stroke="rgba(255,255,255,0.16)" stroke-width="4" stroke-linecap="round"/>
+            <!-- libros -->
+            <rect x="22" y="58" width="6"  height="19" rx="1" fill="#c0392b" opacity="0.75"/>
+            <rect x="30" y="53" width="7"  height="24" rx="1" fill="#6a1b9a" opacity="0.75"/>
+            <rect x="39" y="56" width="5"  height="21" rx="1" fill="#e67e22" opacity="0.75"/>
+            <rect x="46" y="51" width="8"  height="26" rx="1" fill="#1565c0" opacity="0.75"/>
+            <ellipse cx="40" cy="95" rx="26" ry="7" fill="rgba(153,221,170,0.1)" stroke="#99ddaa" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="jp-name">Tarro</div>
+        <div class="jp-desc">Estilo bote de conserva</div>
+      </div>
+
+      <!-- Botella -->
+      <div class="jp-card" data-jar="botella" onclick="selectJar('botella')">
+        <div class="jp-preview">
+          <svg viewBox="0 0 80 115" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="gbt" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#7d5200" stop-opacity="0.5"/>
+                <stop offset="40%"  stop-color="#cc8800" stop-opacity="0.65"/>
+                <stop offset="100%" stop-color="#7d5200" stop-opacity="0.4"/>
+              </linearGradient>
+            </defs>
+            <!-- corcho -->
+            <rect x="33" y="7"  width="14" height="16" rx="3" fill="#c4a46b" stroke="#a07830" stroke-width="1"/>
+            <!-- cuello -->
+            <path d="M33,23 L32,40 Q32,44 26,47 L26,100 Q26,108 40,108 Q54,108 54,100 L54,47 Q48,44 48,40 L47,23 Z"
+                  fill="url(#gbt)" stroke="#cc7700" stroke-width="1.8"/>
+            <!-- hombro highlight -->
+            <path d="M27,47 Q34,43 40,42 Q46,43 53,47" fill="none" stroke="rgba(255,200,80,0.35)" stroke-width="1.5"/>
+            <!-- reflejo en cuerpo -->
+            <line x1="32" y1="55" x2="30" y2="93" stroke="rgba(255,220,100,0.25)" stroke-width="5" stroke-linecap="round"/>
+            <!-- etiqueta -->
+            <rect x="29" y="64" width="22" height="18" rx="2" fill="rgba(240,228,195,0.9)" stroke="rgba(140,100,40,0.5)" stroke-width="1"/>
+            <line x1="31" y1="70" x2="49" y2="70" stroke="#4e3010" stroke-width="1"/>
+            <line x1="31" y1="74" x2="49" y2="74" stroke="#4e3010" stroke-width="1" opacity="0.5"/>
+            <line x1="31" y1="78" x2="49" y2="78" stroke="#4e3010" stroke-width="1" opacity="0.3"/>
+            <!-- libros dentro (translúcidos) -->
+            <rect x="32" y="55" width="4"  height="10" rx="1" fill="#c8a748" opacity="0.45"/>
+            <rect x="37" y="51" width="6"  height="14" rx="1" fill="#8844aa" opacity="0.45"/>
+          </svg>
+        </div>
+        <div class="jp-name">Botella</div>
+        <div class="jp-desc">Misterioso y elegante</div>
+      </div>
+
+      <!-- Caja -->
+      <div class="jp-card" data-jar="caja" onclick="selectJar('caja')">
+        <div class="jp-preview">
+          <svg viewBox="0 0 80 115" xmlns="http://www.w3.org/2000/svg">
+            <!-- tapa abierta (inclinada, hacia atrás) -->
+            <path d="M10,42 L70,42 L64,18 L16,18 Z" fill="#4e2c0c" stroke="#2a1706" stroke-width="1.5"/>
+            <path d="M12,40 L68,40 L63,20 L17,20 Z" fill="#6b3d14"/>
+            <!-- veta madera en tapa -->
+            <line x1="17" y1="26" x2="63" y2="26" stroke="#3e2309" stroke-width="0.8" opacity="0.5"/>
+            <line x1="17" y1="32" x2="63" y2="32" stroke="#3e2309" stroke-width="0.8" opacity="0.5"/>
+            <!-- libros visibles en la caja -->
+            <rect x="17" y="22" width="7"  height="18" rx="1" fill="#c0392b"/>
+            <rect x="26" y="19" width="9"  height="21" rx="1" fill="#1565c0"/>
+            <rect x="37" y="21" width="7"  height="19" rx="1" fill="#27ae60"/>
+            <rect x="46" y="17" width="10" height="23" rx="1" fill="#d4ac0d"/>
+            <!-- cuerpo caja -->
+            <rect x="9"  y="42" width="62" height="58" rx="2" fill="#3e2309" stroke="#2a1706" stroke-width="1.5"/>
+            <rect x="11" y="44" width="58" height="54" rx="1" fill="#5c3410"/>
+            <!-- vetas madera -->
+            <line x1="11" y1="58" x2="69" y2="58" stroke="#3e2309" stroke-width="1"   opacity="0.45"/>
+            <line x1="11" y1="72" x2="69" y2="72" stroke="#3e2309" stroke-width="1"   opacity="0.45"/>
+            <line x1="11" y1="86" x2="69" y2="86" stroke="#3e2309" stroke-width="1"   opacity="0.45"/>
+            <!-- bisagras -->
+            <rect x="16" y="40" width="9"  height="5"  rx="1" fill="#c8a748" stroke="#a07830" stroke-width="0.8"/>
+            <rect x="55" y="40" width="9"  height="5"  rx="1" fill="#c8a748" stroke="#a07830" stroke-width="0.8"/>
+            <!-- cierre -->
+            <rect x="36" y="66" width="8"  height="11" rx="2" fill="#c8a748" stroke="#a07830" stroke-width="0.8"/>
+            <circle cx="40" cy="72" r="2.5" fill="#a07830"/>
+          </svg>
+        </div>
+        <div class="jp-name">Caja de madera</div>
+        <div class="jp-desc">Rústica y acogedora</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════ SCRIPTS ════ -->
+<script src="js/state.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/books.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/drag.js"></script>
+<script src="js/jar-picker.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
