@@ -1,4 +1,4 @@
-'use strict';
+
 
 /* ══════════════════════════════════════════════════
    DRAG.JS — Arrastre en plano vertical (Z=0.5)

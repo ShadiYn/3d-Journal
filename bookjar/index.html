@@ -58,10 +58,27 @@
 <!-- ════ APP ════ -->
 <div id="app">
   <div id="cv"></div>
+
+  <!-- ════ PANEL IZQUIERDO DE DECORACIONES ════ -->
+  <div id="decor-panel">
+    <div class="dp-header">
+      <span>🎨 Decoraciones</span>
+      <button class="sp-close" onclick="closeDecorPanel()">✕</button>
+    </div>
+    <div class="dp-sub">Click derecho sobre una deco para eliminarla</div>
+    <div id="dp-list"></div>
+  </div>
+  <div id="decor-overlay" onclick="closeDecorPanel()"></div>
+
+  <!-- Pista de colocación -->
+  <div id="dp-hint"></div>
   <div class="tbar">
     <div class="tlogo">BOOKJAR</div>
     <div class="tr">
       <span class="uname" id="un"></span>
+      <button id="btn-daynight" class="bdaynight" onclick="toggleDayNight()">☀️ Día</button>
+      <button class="bstats" onclick="toggleStats()">📊 Stats</button>
+      <button class="bdecor" onclick="toggleDecorPanel()" title="Decorar estantería">🎨 Decorar</button>
       <button class="bjar" onclick="oJarPicker()" title="Cambiar tipo de bote">🫙 Bote</button>
       <button class="bshelves" onclick="toggleShelfPanel()" title="Mis estanterías">🗂 Estanterías</button>
       <button class="bnew" onclick="omod()">＋ Nuevo libro</button>
@@ -78,8 +95,20 @@
     <div class="taut"  id="tt-a"></div>
     <div class="tmeta" id="tt-m"></div>
     <div class="tstars" id="tt-s"></div>
+    <div class="tstatus" id="tt-status"></div>
   </div>
   <div id="toast"></div>
+
+
+  <!-- ════ PANEL ESTADÍSTICAS ════ -->
+  <div id="stats-panel">
+    <div class="sp-header">
+      <span>📊 Estadísticas</span>
+      <button class="sp-close" onclick="closeStats()">✕</button>
+    </div>
+    <div class="sp-body"></div>
+  </div>
+  <div id="stats-overlay" onclick="closeStats()"></div>
 
   <!-- ════ PANEL LATERAL DE ESTANTERÍAS ════ -->
   <div id="shelf-panel">
@@ -313,6 +342,59 @@
   </div>
 </div>
 
+
+<!-- ════ MODAL EDICIÓN DE LIBRO ════ -->
+<div class="ov" id="edit-mo">
+  <div class="modal">
+    <button class="mcls" onclick="closeEditModal()">✕</button>
+    <h2>✏️ Editar libro</h2>
+    <div class="fld"><label>Título</label><input class="inp" id="et"></div>
+    <div class="fld"><label>Autor</label><input class="inp" id="ea"></div>
+    <div class="fld">
+      <label>Color de portada</label>
+      <div class="swatches">
+        <div class="sw-edit sw sel" style="background:#c0392b" data-c="#c0392b"></div>
+        <div class="sw-edit sw"     style="background:#e74c3c" data-c="#e74c3c"></div>
+        <div class="sw-edit sw"     style="background:#e67e22" data-c="#e67e22"></div>
+        <div class="sw-edit sw"     style="background:#d4ac0d" data-c="#d4ac0d"></div>
+        <div class="sw-edit sw"     style="background:#27ae60" data-c="#27ae60"></div>
+        <div class="sw-edit sw"     style="background:#1565c0" data-c="#1565c0"></div>
+        <div class="sw-edit sw"     style="background:#6a1b9a" data-c="#6a1b9a"></div>
+        <div class="sw-edit sw"     style="background:#00838f" data-c="#00838f"></div>
+        <div class="sw-edit sw"     style="background:#4e342e" data-c="#4e342e"></div>
+        <div class="sw-edit sw"     style="background:#ec407a" data-c="#ec407a"></div>
+        <div class="sw-edit sw"     style="background:#2e4a26" data-c="#2e4a26"></div>
+        <div class="sw-edit sw"     style="background:#1a237e" data-c="#1a237e"></div>
+      </div>
+      <div class="crow"><input type="color" id="ecc" value="#c0392b"><span>Personalizado</span></div>
+    </div>
+    <div class="fld">
+      <label>Valoración</label>
+      <div class="srow">
+        <span class="str-edit str on" data-v="1">★</span>
+        <span class="str-edit str on" data-v="2">★</span>
+        <span class="str-edit str on" data-v="3">★</span>
+        <span class="str-edit str"    data-v="4">★</span>
+        <span class="str-edit str"    data-v="5">★</span>
+      </div>
+    </div>
+    <div class="fld">
+      <label>Estado</label>
+      <div class="status-row">
+        <button class="status-btn sel" data-s="pendiente">⏳ Pendiente</button>
+        <button class="status-btn"     data-s="leyendo">📖 Leyendo</button>
+        <button class="status-btn"     data-s="leido">✓ Leído</button>
+      </div>
+    </div>
+    <div class="fld"><label>Páginas</label><input class="inp" type="number" id="epg" min="20" max="2000"></div>
+    <div class="fld"><label>Fecha de lectura</label><input class="inp" type="date" id="ed" style="color-scheme:dark"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="bgold" onclick="saveEdit()" style="flex:1">Guardar cambios</button>
+      <button class="bdel"  onclick="deleteBook(editingBookId)">🗑️ Eliminar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ════ SCRIPTS ════ -->
 <script src="js/state.js"></script>
 <script src="js/auth.js"></script>
@@ -320,7 +402,13 @@
 <script src="js/books.js"></script>
 <script src="js/scene.js"></script>
 <script src="js/drag.js"></script>
+<script src="js/touch.js"></script>
+<script src="js/atmosphere.js"></script>
+<script src="js/book-actions.js"></script>
+<script src="js/stats.js"></script>
 <script src="js/jar-picker.js"></script>
+<script src="js/decor.js"></script>
+<script src="js/decor-panel.js"></script>
 <script src="js/shelf-panel.js"></script>
 <script src="js/app.js"></script>
 
