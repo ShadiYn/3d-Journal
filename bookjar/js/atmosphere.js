@@ -106,77 +106,38 @@ function animateDust(t) {
 
 // ── Modo día/noche ─────────────────────────────────
 
-var DAY_CONFIG = {
-  bg:  0x1a1830, fog: 0x1a1830,
-  ambient: { color: 0x7060a8, intensity: 2.2 },
-  main:    { color: 0xfff5e0, intensity: 5.5, pos: [-0.5, 7, 5] },
-  fill:    { color: 0xffeedd, intensity: 2.5, pos: [6, 3.5, 5] },
-  rim:     { color: 0x9999ff, intensity: 1.0, pos: [-4, 2, -2] },
-  dust:    0.55,
-};
-var NIGHT_CONFIG = {
-  bg:  0x090810, fog: 0x090810,
-  ambient: { color: 0x1a1025, intensity: 1.5 },
-  main:    { color: 0xffd090, intensity: 3.5, pos: [-0.5, 7, 5] },
-  fill:    { color: 0xff9944, intensity: 1.8, pos: [6, 3.5, 5] },
-  rim:     { color: 0x334488, intensity: 1.2, pos: [-4, 2, -2] },
-  dust:    0.35,
-};
 
-var _scLights = [];   // [ambient, main, fill, rim] referencias
+
+
+var _lampOn    = false;
+var _lampLight = null;   // PointLight de la lámpara
 
 /** Guarda referencias a las luces de la escena tras mkLights() */
-function captureLights() {
-  _scLights = [];
-  sc.traverse(o => {
-    if (o.isLight) _scLights.push(o);
-  });
-}
 
-function toggleDayNight() {
-  isNight = !isNight;
-  applyLightConfig(isNight ? NIGHT_CONFIG : DAY_CONFIG);
 
-  const btn = document.getElementById('btn-daynight');
-  btn.textContent = isNight ? '☀️ Día' : '🌙 Noche';
 
-  // Cambiar fondo/niebla de la escena activa
-  const st = CASE_STYLES[currentCase];
-  if (isNight) {
-    sc.background = new THREE.Color(st.bg);
-    sc.fog = new THREE.FogExp2(st.fog, 0.028);
-  } else {
-    sc.background = new THREE.Color(DAY_CONFIG.bg);
-    sc.fog = new THREE.FogExp2(DAY_CONFIG.fog, 0.025);
-  }
 
-  markShadowDirty();
-}
 
-function applyLightConfig(cfg) {
-  if (!_scLights.length) return;
-  // Orden: HemisphereLight, AmbientLight, PointLight×3
-  _scLights.forEach(l => {
-    if (l.isAmbientLight) {
-      l.color.set(cfg.ambient.color);
-      l.intensity = cfg.ambient.intensity;
-    }
-    if (l.isPointLight) {
-      const d = Math.round(l.position.distanceTo(new THREE.Vector3(...cfg.main.pos)));
-      if (d < 2) {
-        l.color.set(cfg.main.color); l.intensity = cfg.main.intensity;
-      } else if (l.position.x > 4) {
-        l.color.set(cfg.fill.color); l.intensity = cfg.fill.intensity;
-      } else {
-        l.color.set(cfg.rim.color);  l.intensity = cfg.rim.intensity;
-      }
-    }
-  });
-  if (dustParticles) dustParticles.material.opacity = cfg.dust;
-}
 
 /** Punto de entrada: inicializa todo. Llamar tras mkLights() en initScene. */
 function initAtmosphere() {
-  captureLights();
   mkDust();
+}
+
+// ── Lámpara de escritorio ──────────────────────────
+
+function toggleLamp() {
+  _lampOn = !_lampOn;
+  if (_lampLight) {
+    _lampLight.intensity = _lampOn ? 1.4 : 0;
+  }
+  var btn = document.getElementById('btn-lamp');
+  if (btn) btn.textContent = _lampOn ? '💡' : '🔦';
+  markShadowDirty();
+}
+
+/** Registra la luz de la lámpara para poder controlarla */
+function registerLampLight(light) {
+  _lampLight = light;
+  _lampLight.intensity = 0;   // apagada por defecto
 }

@@ -1,5 +1,3 @@
-'use strict';
-
 /* ══════════════════════════════════════════════════
    SCENE.JS — Construcción de la escena 3D:
               luces, suelo, estantería, slots y botes
@@ -145,7 +143,7 @@ function buildJarCristal(g) {
   bot.rotation.x = -Math.PI / 2; bot.position.y = -1.2; g.add(bot);
   const rim = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.045, 8, 32), gcap);
   rim.position.y = 1.2; g.add(rim);
-  g.add(Object.assign(new THREE.PointLight(0x88bbcc, 0.6, 4)));
+  var jl1 = new THREE.PointLight(0x88bbcc, 0.6, 4); jl1.userData.isJarLight = true; g.add(jl1);
   mkJarLabel(g, 0.74);
 }
 
@@ -173,7 +171,7 @@ function buildJarTarro(g) {
   lidTop.rotation.x = -Math.PI / 2; lidTop.position.y = 1.28; g.add(lidTop);
   const rim = new THREE.Mesh(new THREE.TorusGeometry(0.66, 0.025, 8, 32), lidMat);
   rim.position.y = 1.28; g.add(rim);
-  g.add(Object.assign(new THREE.PointLight(0x88ccaa, 0.5, 4)));
+  var jl2 = new THREE.PointLight(0x88ccaa, 0.5, 4); jl2.userData.isJarLight = true; g.add(jl2);
   mkJarLabel(g, 0.84);
 }
 
@@ -262,4 +260,62 @@ function buildJarCaja(g) {
   gl.position.set(0, 0.4, 0); g.add(gl);
 
   mkJarLabel(g, 0.56, 0.10);
+}
+
+// ── Lámpara de escritorio ──────────────────────────
+
+function mkLamp() {
+  var g = new THREE.Group();
+  var metalMat  = new THREE.MeshPhongMaterial({ color: 0x2a2a2a, shininess: 120, specular: 0x888888 });
+  var shadeMat  = new THREE.MeshPhongMaterial({ color: 0x1a1208, shininess: 60, side: THREE.DoubleSide });
+  var bulbMat   = new THREE.MeshPhongMaterial({ color: 0xfffde0, emissive: 0xffee88, emissiveIntensity: 0.0, shininess: 200 });
+
+  // Base
+  var base = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.06, 16), metalMat);
+  base.position.y = 0.03; g.add(base);
+
+  // Brazo inferior
+  var arm1 = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.55, 8), metalMat);
+  arm1.position.set(0, 0.33, 0); g.add(arm1);
+
+  // Articulación
+  var joint = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 8), metalMat);
+  joint.position.y = 0.62; g.add(joint);
+
+  // Brazo superior (inclinado hacia adelante)
+  var arm2 = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.48, 8), metalMat);
+  arm2.rotation.x = 0.45;
+  arm2.position.set(0, 0.86, 0.11); g.add(arm2);
+
+  // Pantalla (cono invertido)
+  var shade = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.28, 16, 1, true), shadeMat);
+  shade.rotation.x = Math.PI;   // invertir
+  shade.position.set(0, 1.08, 0.22); g.add(shade);
+
+  // Interior de la pantalla (más claro)
+  var shadeIn = new THREE.Mesh(new THREE.ConeGeometry(0.20, 0.26, 16, 1, true),
+    new THREE.MeshLambertMaterial({ color: 0xd4b86a, side: THREE.BackSide }));
+  shadeIn.rotation.x = Math.PI;
+  shadeIn.position.copy(shade.position); g.add(shadeIn);
+
+  // Bombilla
+  var bulb = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 8), bulbMat);
+  bulb.position.set(0, 1.00, 0.22); g.add(bulb);
+
+  // Luz — cálida, enfocada hacia abajo
+  var light = new THREE.SpotLight(0xffd580, 0, 8, Math.PI / 4, 0.4, 1.5);
+  light.userData.isLamp = true;
+  light.position.set(0, 1.02, 0.22);
+  light.target.position.set(0, -1, 0.22);
+  g.add(light); g.add(light.target);
+  registerLampLight(light);
+
+  // Posición: encima de la estantería, lado derecho
+  g.position.set(2.6, 4.74, 0.3);
+  g.scale.setScalar(0.9);
+  sc.add(g);
+
+  // Click en la lámpara para encender/apagar
+  bulb.userData.isLamp = true;
+  shade.userData.isLamp = true;
 }

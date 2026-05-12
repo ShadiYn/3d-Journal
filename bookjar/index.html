@@ -24,7 +24,7 @@
       <button class="atab on" onclick="stab('l')">Iniciar sesión</button>
       <button class="atab"    onclick="stab('r')">Crear cuenta</button>
     </div>
-    <div id="pl">
+    <form id="pl" onsubmit="dol();return false;">
       <div class="fld">
         <label>Usuario</label>
         <input class="inp" id="lu" placeholder="nombre de usuario" autocomplete="username"
@@ -36,9 +36,9 @@
                onkeydown="if(event.key==='Enter')dol()">
       </div>
       <div class="errm" id="le"></div>
-      <button class="bgold" onclick="dol()">Entrar a mi biblioteca</button>
-    </div>
-    <div id="pr" style="display:none">
+      <button class="bgold" type="submit">Entrar a mi biblioteca</button>
+    </form>
+    <form id="pr" style="display:none" onsubmit="dor();return false;">
       <div class="fld">
         <label>Usuario</label>
         <input class="inp" id="ru" placeholder="elige un nombre" autocomplete="username"
@@ -50,13 +50,15 @@
                onkeydown="if(event.key==='Enter')dor()">
       </div>
       <div class="errm" id="re"></div>
-      <button class="bgold" onclick="dor()">Crear mi biblioteca</button>
-    </div>
+      <button class="bgold" type="submit">Crear mi biblioteca</button>
+    </form>
   </div>
 </div>
 
 <!-- ════ APP ════ -->
 <div id="app">
+  <div id="intro-overlay"></div>
+  <div id="lp-ring"></div>
   <div id="cv"></div>
 
   <!-- ════ PANEL IZQUIERDO DE DECORACIONES ════ -->
@@ -76,8 +78,11 @@
     <div class="tlogo">BOOKJAR</div>
     <div class="tr">
       <span class="uname" id="un"></span>
-      <button id="btn-daynight" class="bdaynight" onclick="toggleDayNight()">☀️ Día</button>
       <button class="bstats" onclick="toggleStats()">📊 Stats</button>
+      <button id="btn-lamp" class="bicon" onclick="toggleLamp()" title="Lámpara">🔦</button>
+      <button id="btn-mute"  class="bicon" onclick="toggleMute()" title="Silenciar">🔊</button>
+      <button id="btn-cloud" class="bicon" onclick="onCloudBtn()" title="Nube" data-status="unconfigured">☁️</button>
+      <button class="bsearch" onclick="toggleSearch()" title="Buscar libros">🔍 Buscar</button>
       <button class="bdecor" onclick="toggleDecorPanel()" title="Decorar estantería">🎨 Decorar</button>
       <button class="bjar" onclick="oJarPicker()" title="Cambiar tipo de bote">🫙 Bote</button>
       <button class="bshelves" onclick="toggleShelfPanel()" title="Mis estanterías">🗂 Estanterías</button>
@@ -100,6 +105,28 @@
   <div id="toast"></div>
 
 
+
+
+  <!-- ════ VISOR 3D DE LIBRO ════ -->
+  <div id="bv-overlay">
+    <button class="bv-close" onclick="closeBookViewer()">✕</button>
+    <div class="bv-info">
+      <div class="bv-title" id="bv-title"></div>
+      <div class="bv-author" id="bv-author"></div>
+      <div class="bv-hint">Arrastra para girar</div>
+    </div>
+    <canvas id="bv-canvas"></canvas>
+  </div>
+
+  <!-- ════ PANEL BÚSQUEDA ════ -->
+  <div id="search-panel">
+    <div class="srch-header">
+      <input id="search-inp" class="srch-inp" type="text" placeholder="Título o autor…"
+             oninput="onSearchInput(this)" autocomplete="off">
+      <button class="sp-close" onclick="closeSearch()">✕</button>
+    </div>
+    <div id="search-results"></div>
+  </div>
   <!-- ════ PANEL ESTADÍSTICAS ════ -->
   <div id="stats-panel">
     <div class="sp-header">
@@ -138,6 +165,28 @@
   <div class="modal">
     <button class="mcls" onclick="cmod()">✕</button>
     <h2>✦ Nuevo libro</h2>
+
+    <!-- Búsqueda Open Library -->
+    <div class="fld">
+      <label>Buscar libro <span class="ol-badge">Open Library</span></label>
+      <div class="ol-wrap">
+        <input class="inp" id="ol-inp" placeholder="Escribe el título para buscar…"
+               oninput="olSearchInput(this)" autocomplete="off">
+        <div id="ol-dropdown" class="ol-dropdown" style="display:none">
+          <div id="ol-results"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview portada seleccionada -->
+    <div id="cover-preview-wrap" class="cover-preview-wrap" style="display:none">
+      <div id="cover-preview" class="cover-preview"></div>
+      <div class="cover-preview-info">
+        <span class="cover-preview-lbl">Portada encontrada ✓</span>
+        <button class="cover-rm" onclick="removeCover()">✕ Quitar</button>
+      </div>
+    </div>
+
     <div class="fld">
       <label>Título</label>
       <input class="inp" id="mt" placeholder="El título del libro">
@@ -402,9 +451,15 @@
 <script src="js/books.js"></script>
 <script src="js/scene.js"></script>
 <script src="js/drag.js"></script>
+<script src="js/openlibrary.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/camera-anim.js"></script>
+<script src="js/search.js"></script>
+<script src="js/cloud.js"></script>
 <script src="js/touch.js"></script>
 <script src="js/atmosphere.js"></script>
 <script src="js/book-actions.js"></script>
+<script src="js/book-viewer.js"></script>
 <script src="js/stats.js"></script>
 <script src="js/jar-picker.js"></script>
 <script src="js/decor.js"></script>

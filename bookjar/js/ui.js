@@ -1,5 +1,3 @@
-'use strict';
-
 /* ══════════════════════════════════════════════════
    UI.JS — Interfaz: modal, toast, estadísticas,
            paleta de colores y valoración por estrellas
@@ -33,12 +31,14 @@ function oncc(el) {
 
 /** Abre el modal y resetea la fecha a hoy */
 function omod() {
+  sndModalOpen();
   document.getElementById('mo').classList.add('open');
   document.getElementById('md').value = new Date().toISOString().slice(0, 10);
 }
 
 /** Cierra el modal */
 function cmod() {
+  sndModalClose();
   document.getElementById('mo').classList.remove('open');
 }
 
@@ -78,16 +78,22 @@ function subBook() {
     id:          Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
     title, author, color: pc, rating: pr, readingDate: date,
     pages:    pages || null,
+    coverUrl: _coverUrl || null,
     location: 'jar', slotId: null,
     wm: pages >= 20 ? pagesToWm(pages) : 0.82 + Math.random() * 0.36,
     hm: 0.88 + Math.random() * 0.28,
   };
+
+  // Si hay portada descargada, adjuntarla al libro (no se serializa, se recarga)
+  if (_coverImg) book.coverImg = _coverImg;
 
   books.push(book);
   persist();
   addToJar(book, true);
   updStats();
   cmod();
+  hideCoverPreview && hideCoverPreview();
+  _coverUrl = ''; _coverImg = null;
   toast('"' + title + '" añadido al bote 🫙');
 
   document.getElementById('mt').value  = '';
@@ -95,13 +101,17 @@ function subBook() {
   document.getElementById('mpg').value = '';
   document.getElementById('pgfill').style.width = '0%';
   document.getElementById('pglbl').textContent  = '—';
+  var olInp = document.getElementById('ol-inp');
+  if (olInp) olInp.value = '';
+  hideOlResults && hideOlResults();
+  hideCoverPreview && hideCoverPreview();
 }
 
 // ── Persistencia ───────────────────────────────────
 
 /** Guarda el estado actual de los libros en localStorage (excluye props de runtime) */
 function persist() {
-  sbk(CU, books.map(({ mesh, jarPos, jarRot, _bh, ...d }) => d));
+  sbk(CU, books.map(({ mesh, jarPos, jarRot, _bh, ...d }) => d), currentCase);
 }
 
 // ── Estadísticas ───────────────────────────────────

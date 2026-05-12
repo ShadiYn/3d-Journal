@@ -4,23 +4,23 @@
 ══════════════════════════════════════════════════ */
 
 // ── Auth ──
-let CU = null;   // usuario actual
+var CU = null;   // usuario actual
 
 // ── Datos de libros y opciones del modal ──
-let books = [];
-let pc = '#c0392b';   // color seleccionado
-let pr = 3;           // valoración seleccionada
+var books = [];
+var pc = '#c0392b';   // color seleccionado
+var pr = 3;           // valoración seleccionada
 
 // ── localStorage helpers ──
-const gu  = ()      => JSON.parse(localStorage.getItem('bj_u') || '{}');
-const su  = u       => localStorage.setItem('bj_u', JSON.stringify(u));
-const gbk = (u,c=0) => JSON.parse(localStorage.getItem('bj_b_'+u+'_c'+c) || '[]');
-const sbk = (u,b,c=0)=> localStorage.setItem('bj_b_'+u+'_c'+c, JSON.stringify(b));
+var gu  = ()      => JSON.parse(localStorage.getItem('bj_u') || '{}');
+var su  = u       => localStorage.setItem('bj_u', JSON.stringify(u));
+var gbk = (u,c=0) => JSON.parse(localStorage.getItem('bj_b_'+u+'_c'+c) || '[]');
+var sbk = (u,b,c=0)=> localStorage.setItem('bj_b_'+u+'_c'+c, JSON.stringify(b));
 
 // ── Estanterías: estilos y progresión ────────────────
-const UNLOCK_THRESHOLD = 8;   // libros en estantería para desbloquear la siguiente
+var UNLOCK_THRESHOLD = 8;   // libros en estantería para desbloquear la siguiente
 
-const CASE_STYLES = [
+var CASE_STYLES = [
   {
     name: 'Roble clásico',   icon: '🪵', desc: 'Cálida y atemporal',
     wood: 0x3e2309, dark: 0x2a1706, back: 0x160c02, trim: 0x4e2c0c,
@@ -49,41 +49,41 @@ const CASE_STYLES = [
 ];
 
 // ── Objetos Three.js (se asignan en initScene) ──
-let sc, cam, ren, clk, raf;
-let rc;
-let MV     = new THREE.Vector2();
-let DPLANE = new THREE.Plane(new THREE.Vector3(0, 0, 1), -0.5); // plano vertical Z=0.5, cara frontal estantería
+var sc, cam, ren, clk, raf;
+var rc;
+var MV     = null;   // init en initScene: new THREE.Vector2()
+var DPLANE = null;   // init en initScene: new THREE.Plane(...)
 
 // ── Estado de drag & drop ──
-const DRAG_Z = 0.5;  // Z fija durante arrastre (cara frontal estantería)
-let dragB   = null;
-let isDrag  = false;
-let slHls   = [];     // meshes de highlight activos
-let highSl  = null;   // slot destacado actual
+var DRAG_Z = 0.5;  // Z fija durante arrastre (cara frontal estantería)
+var dragB   = null;
+var isDrag  = false;
+var slHls   = [];     // meshes de highlight activos
+var highSl  = null;   // slot destacado actual
 
 // ── Constantes de escena ──
-const SHELF_TOPS = [0.0, 1.55, 3.1];   // Y de cada balda
-const PT = 0.1;                          // grosor de plank
-const SW = 6.0;                          // ancho estantería
-const SD = 1.0;                          // profundidad estantería
-const JP = new THREE.Vector3(5.5, 0.55, 0.1);  // posición del bote
-const SPR = 13;                           // slots por balda
+var SHELF_TOPS = [0.0, 1.55, 3.1];   // Y de cada balda
+var PT = 0.1;                          // grosor de plank
+var SW = 6.0;                          // ancho estantería
+var SD = 1.0;                          // profundidad estantería
+var JP = null;   // init en initScene: new THREE.Vector3(5.5, 0.55, 0.1)
+var SPR = 13;                           // slots por balda
 
 // ── Slots de la estantería ──
-let slots = [];
+var slots = [];
 
 // ── Estantería activa y estilo ──
-let currentCase  = 0;       // índice en CASE_STYLES
-let shelfGroup   = null;    // THREE.Group de la estantería en escena
+var currentCase  = 0;       // índice en CASE_STYLES
+var shelfGroup   = null;    // THREE.Group de la estantería en escena
 
 
 // ── Decoraciones ──────────────────────────────────
-let decorations  = [];     // [{id, type, anchorId, group}] activos en escena
-let placingDecor = null;   // string con el tipo que se está colocando ahora
+var decorations  = [];     // [{id, type, anchorId, group}] activos en escena
+var placingDecor = null;   // string con el tipo que se está colocando ahora
 
 // Anchors: puntos de colocación válidos en la estantería
 // type: 'shelf' = encima de balda/cima | 'wall' = panel trasero | 'edge' = cuelga del frontal
-const DECOR_ANCHORS = [
+var DECOR_ANCHORS = [
   // Cima de la estantería (5 puntos)
   { id:'top-l',  x:-2.2, y:4.74, z:0.28, type:'shelf' },
   { id:'top-ml', x:-1.1, y:4.74, z:0.28, type:'shelf' },
@@ -115,7 +115,7 @@ const DECOR_ANCHORS = [
 ];
 
 // Qué tipos de decoración son válidos en qué tipo de anchor
-const DECOR_ANCHOR_COMPAT = {
+var DECOR_ANCHOR_COMPAT = {
   cactus:      ['shelf'],
   maceta:      ['shelf'],
   enredadera:  ['edge'],
@@ -127,12 +127,23 @@ const DECOR_ANCHOR_COMPAT = {
   cuadro:      ['wall'],
   corona:      ['shelf'],
 };
+
+// ── Atmósfera ─────────────────────────────────────
+var dustParticles = null;     // THREE.Points de polvo
+var candleFlames  = [];       // [{mesh, light, base}] para animar
+
+// ── Estados de libro ──────────────────────────────
+var BOOK_STATUS = {
+  pendiente: { label: 'Pendiente', icon: '⏳', tint: null   },
+  leyendo:   { label: 'Leyendo',   icon: '📖', tint: 0x00aaff },
+  leido:     { label: 'Leído',     icon: '✓',  tint: 0x44cc66 },
+};
 // ── Caché de textura de páginas (se invalida al cerrar sesión) ──
-let ptex = null;
+var ptex = null;
 
 // ── Tipo de bote y su referencia en la escena ──
-let jarType  = 'cristal';   // 'cristal' | 'tarro' | 'botella' | 'caja'
-let jarGroup = null;         // THREE.Group del bote actual (para poder reconstruirlo)
+var jarType  = 'cristal';   // 'cristal' | 'tarro' | 'botella' | 'caja'
+var jarGroup = null;         // THREE.Group del bote actual (para poder reconstruirlo)
 
 // ── Timer del toast ──
-let _tt;
+var _tt;

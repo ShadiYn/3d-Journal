@@ -1,5 +1,3 @@
-'use strict';
-
 /* ══════════════════════════════════════════════════
    BOOKS.JS — Texturas, mesh y posicionamiento en bote
 ══════════════════════════════════════════════════ */
@@ -27,6 +25,16 @@ function mkSpineTex(book) {
   ctx.fillRect(0, 0, cw, 18); ctx.fillRect(0, ch - 18, cw, 18);
   ctx.fillStyle = 'rgba(255,255,255,0.11)';
   ctx.fillRect(cw - 7, 18, 7, ch - 36);
+  // Franja de estado en la parte inferior del lomo
+  if (book.status && book.status !== 'pendiente') {
+    const tint = book.status === 'leido' ? '#44cc66' : '#00aaff';
+    ctx.fillStyle = tint;
+    ctx.fillRect(0, ch - 18, cw, 18);
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(book.status === 'leido' ? '✓' : '▶', cw/2, ch - 6);
+  }
   ctx.save();
   ctx.translate(cw / 2, ch - 24); ctx.rotate(-Math.PI / 2);
   ctx.fillStyle = 'rgba(255,255,255,0.92)';
@@ -84,7 +92,10 @@ function buildMesh(book) {
   const bd = 0.7;
   const pg    = mkPageTex();
   const spine = mkSpineTex(book);
-  const cover = mkCoverTex(book);
+  // Usar portada real si existe, si no la procedural
+  const cover = (book.coverImg && book.coverImg.complete && book.coverImg.naturalWidth)
+    ? mkCoverTexFromImg(book, book.coverImg)
+    : mkCoverTex(book);
   const base  = new THREE.Color(book.color);
   const dark  = base.clone().multiplyScalar(0.68);
   const mats = [

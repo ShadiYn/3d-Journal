@@ -1,15 +1,15 @@
-'use strict';
-
 /* ══════════════════════════════════════════════════
    APP.JS — Inicialización, carga de libros y loop
 ══════════════════════════════════════════════════ */
 
-const TARGET_FPS   = 60;
-const FRAME_BUDGET = 1000 / TARGET_FPS;
-let   lastFrame    = 0;
+var TARGET_FPS   = 60;
+var FRAME_BUDGET = 1000 / TARGET_FPS;
+var lastFrame       = 0;
+var _jarBooksCache  = [];
+var _jarCacheDirty  = true;
 
 // Flag de sombras: solo se recalculan cuando algo se mueve
-let shadowsDirty = true;
+var shadowsDirty = true;
 
 /** Marca que las sombras necesitan actualizarse este frame */
 function markShadowDirty() { shadowsDirty = true; }
@@ -18,6 +18,11 @@ function markShadowDirty() { shadowsDirty = true; }
 
 function initScene() {
   document.getElementById('cv').innerHTML = '';
+
+  // Inicializar objetos Three.js que dependen de que la librería esté cargada
+  MV     = new THREE.Vector2();
+  DPLANE = new THREE.Plane(new THREE.Vector3(0, 0, 1), -DRAG_Z);
+  JP     = new THREE.Vector3(5.5, 0.55, 0.1);
 
   sc = new THREE.Scene();
   const _st = CASE_STYLES[currentCase];
@@ -38,17 +43,22 @@ function initScene() {
   document.getElementById('cv').appendChild(ren.domElement);
 
   rc = new THREE.Raycaster();
-  DPLANE.set(new THREE.Vector3(0,0,1), -DRAG_Z);
   clk = new THREE.Clock();
 
   mkLights(); mkFloor(); mkShelf(); mkJar(); mkSlots();
+  initAtmosphere();
+  mkLamp();
 
   ren.domElement.addEventListener('mousedown', onDn);
   ren.domElement.addEventListener('mousemove', onMv);
   ren.domElement.addEventListener('mouseup',   onUp);
   window.addEventListener('resize', onRz);
+  registerTouchListeners();
 
   loadBooks();
+  loadDecors();
+  // Intro cinematográfica (sin animación de caída de libros)
+  playIntro(null);
   tick(0);
 }
 
@@ -59,7 +69,32 @@ function loadBooks() {
   const saved = gbk(CU, currentCase);
   if (!saved.length) return;
 
-  saved.forEach(d => books.push({ ...d, mesh: null, jarPos: null, jarRot: null }));
+  saved.forEach(d => {
+    var book = Object.assign({}, d, { mesh: null, jarPos: null, jarRot: null });
+    books.push(book);
+    // Recargar portada en background si existe
+    if (book.coverUrl) {
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function() {
+        book.coverImg = img;
+        // Reconstruir mesh con la portada real si ya está en escena
+        if (book.mesh) {
+          var pos = book.mesh.position.clone();
+          var rot = book.mesh.rotation.clone();
+          var sh  = book.mesh.castShadow;
+          sc.remove(book.mesh);
+          buildMesh(book);
+          book.mesh.position.copy(pos);
+          book.mesh.rotation.copy(rot);
+          book.mesh.castShadow = sh;
+          sc.add(book.mesh);
+          markShadowDirty();
+        }
+      };
+      img.src = book.coverUrl;
+    }
+  });
 
   books.forEach(book => {
     if (book.location === 'jar') {
@@ -79,7 +114,8 @@ function loadBooks() {
 
   updStats();
   markShadowDirty();
-  recheckUnlocks();  // detectar desbloqueos pendientes al cargar
+  recheckUnlocks();
+  _jarCacheDirty = true;  // detectar desbloqueos pendientes al cargar
 }
 
 // ── tick ──────────────────────────────────────────
@@ -91,11 +127,22 @@ function tick(now) {
 
   const t = clk.getElapsedTime();
 
-  // Flotación solo de libros en el bote
-  const jarBooks = books.filter(b => b.location === 'jar' && b.mesh && b !== dragB && b.jarPos);
-  jarBooks.forEach(b => {
-    b.mesh.position.y = b.jarPos.y + Math.sin(t * .6 + b.id.charCodeAt(0) * .4) * .012;
-  });
+  animateCandles(t);
+  animateDust(t);
+
+  // Flotación libros en el bote — cache reconstruido solo cuando cambia el estado
+  if (_jarCacheDirty) {
+    _jarBooksCache = books.filter(function(b) {
+      return b.location === 'jar' && b.mesh && b.jarPos;
+    });
+    _jarCacheDirty = false;
+  }
+  var _jlen = _jarBooksCache.length;
+  for (var _ji = 0; _ji < _jlen; _ji++) {
+    var _jb = _jarBooksCache[_ji];
+    if (_jb === dragB) continue;
+    _jb.mesh.position.y = _jb.jarPos.y + Math.sin(t * .6 + _jb.id.charCodeAt(0) * .4) * .012;
+  }
 
   // Sombras bajo demanda: solo cuando algo cambió
   if (shadowsDirty) {
