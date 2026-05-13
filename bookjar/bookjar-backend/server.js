@@ -1,30 +1,33 @@
 require('dotenv').config();
 const express = require('express');
-const cors    = require('cors');
 const { connectDB } = require('./db');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
 
-// ── Middleware global ──────────────────────────────
-app.use(cors({ origin: '*', methods: ['GET','POST','PUT','DELETE'], allowedHeaders: ['Content-Type','Authorization'] }));
+// ── CORS manual — más fiable que el paquete cors ──
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin',  '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
+
 app.use(express.json({ limit: '2mb' }));
 
-// Log de cada petición para debug
 app.use(function(req, res, next) {
   console.log('[req]', req.method, req.path);
   next();
 });
 
-// ── Rutas públicas (sin JWT) ───────────────────────
+// ── Rutas públicas ─────────────────────────────────
 app.post('/api/auth/register', require('./routes/auth').register);
 app.post('/api/auth/login',    require('./routes/auth').login);
 app.get('/health', function(req, res) { res.json({ ok: true }); });
-
-// ── Ruta pública: color de portada ───────────────────
 app.use('/api/cover-color', require('./routes/cover'));
 
-// ── Rutas protegidas (con JWT) ─────────────────────
+// ── Rutas protegidas ───────────────────────────────
 app.use('/api/sync', require('./routes/sync'));
 
 connectDB().then(function() {
