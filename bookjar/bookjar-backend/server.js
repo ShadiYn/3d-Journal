@@ -3,8 +3,7 @@ const express = require('express');
 const { connectDB } = require('./db');
 
 const app  = express();
-const PORT = process.env.PORT || 3001;
-
+const PORT = process.env.PORT;
 // ── CORS manual — más fiable que el paquete cors ──
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
