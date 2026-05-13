@@ -1,1 +1,5 @@
 # ______13/05/2003_______añadido el backend completamente funcional, aparte, añadidas varias funciones como estadisiticas, al clcilar una sola vez en el libro puedes verlo en mas detalla en 3d junto a un movimiento d para pues ver el liibro jeje detalles, también añadida una pequeña lampara decorativa que se ilumina (porque no?)añadida funcionalidad de desbloquear más estanterias a mediad que vas agregando libros, IMPLEMENTADO, openlibrary, para sobretodo al buscar un libro pues te aparezca y se rellene la infromación automatica, implementado el intento de dependiendo de los colores de la portada se escoja el color predominante y el objeto libro en 3d tenga el mismo color que la portada pero me está costando hacerlo la verdad, enfin, y pues creo que por ahora sería todo sip.
+shadyndyn_db_user
+0cPxT6WaN4RtT6sK
+
+mongodb+srv://shadyndyn_db_user:<db_password>@cluster0.afmj7io.mongodb.net/?appName=Cluster0
