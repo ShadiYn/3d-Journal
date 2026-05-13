@@ -10,7 +10,9 @@
 // ▼ Cambia esto por la URL de tu backend desplegado
 // En local: 'http://localhost:3001'
 // En Railway: 'https://tu-app.up.railway.app'
-var API_URL = 'http://localhost:3001';
+
+const API_URL = 'https://bookjar-backend.up.railway.app';
+
 
 var _token     = null;   // JWT guardado en localStorage
 var _cloudSync = false;  // sync activo
