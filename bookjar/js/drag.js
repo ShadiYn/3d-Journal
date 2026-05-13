@@ -158,7 +158,6 @@ function onMv(e) {
       document.getElementById('tt-m').textContent = (b.readingDate ? '📅 ' + b.readingDate : '') + (b.pages ? '  · ' + b.pages + ' pág.' : '');
       document.getElementById('tt-s').textContent = '★'.repeat(b.rating) + '☆'.repeat(5 - b.rating);
       document.getElementById('tt-status').textContent = st.icon + ' ' + st.label;
-      injectTooltipEdit(b);
       tt.style.left = (e.clientX + 14) + 'px';
       tt.style.top  = (e.clientY - 8)  + 'px';
       tt.classList.add('show');

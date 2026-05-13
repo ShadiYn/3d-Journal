@@ -4,6 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>BookJar – Biblioteca 3D</title>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#06040c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <!-- iOS específico -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BookJar">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -116,6 +126,19 @@
       <div class="bv-hint">Arrastra para girar</div>
     </div>
     <canvas id="bv-canvas"></canvas>
+    <div class="bv-actions">
+      <!-- Estado rápido -->
+      <div class="bv-status-row">
+        <button class="bv-st-btn" data-s="pendiente" onclick="bvSetStatus('pendiente')">⏳ Pendiente</button>
+        <button class="bv-st-btn" data-s="leyendo"   onclick="bvSetStatus('leyendo')">📖 Leyendo</button>
+        <button class="bv-st-btn" data-s="leido"     onclick="bvSetStatus('leido')">✓ Leído</button>
+      </div>
+      <!-- Acciones -->
+      <div class="bv-btn-row">
+        <button class="bv-btn-edit"  onclick="bvEdit()">✏️ Editar</button>
+        <button class="bv-btn-del"   onclick="bvDelete()">🗑️ Eliminar</button>
+      </div>
+    </div>
   </div>
 
   <!-- ════ PANEL BÚSQUEDA ════ -->
@@ -467,5 +490,14 @@
 <script src="js/shelf-panel.js"></script>
 <script src="js/app.js"></script>
 
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js')
+          .then(function(reg) { console.log('[PWA] SW registrado:', reg.scope); })
+          .catch(function(e)  { console.warn('[PWA] SW falló:', e); });
+      });
+    }
+  </script>
 </body>
 </html>

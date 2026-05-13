@@ -924,3 +924,52 @@ html, body {
 }
 
 /* Update hint text */
+
+/* ══════════════════════════════════════════════════
+   ACCIONES DEL VISOR DE LIBRO
+══════════════════════════════════════════════════ */
+.bv-actions {
+  display: flex; flex-direction: column; gap: 10px;
+  align-items: center; width: 340px; max-width: 92vw;
+}
+
+/* Botones de estado */
+.bv-status-row {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+.bv-st-btn {
+  padding: 7px 14px;
+  background: rgba(255,255,255,.06);
+  border: 1.5px solid var(--bd);
+  border-radius: 20px;
+  color: var(--txtd);
+  font-family: 'EB Garamond', serif; font-size: 13px;
+  cursor: pointer; transition: all .18s;
+}
+.bv-st-btn:hover { border-color: rgba(255,255,255,.2); color: var(--txt); }
+.bv-st-btn.active {
+  border-color: var(--gold);
+  background: rgba(200,167,72,.15);
+  color: var(--gold); font-weight: 600;
+}
+
+/* Botones de acción */
+.bv-btn-row { display: flex; gap: 10px; }
+.bv-btn-edit {
+  padding: 9px 22px;
+  background: rgba(200,167,72,.12);
+  border: 1px solid var(--golda);
+  border-radius: 10px; color: var(--gold);
+  font-family: 'EB Garamond', serif; font-size: 14px;
+  cursor: pointer; transition: all .18s;
+}
+.bv-btn-edit:hover { background: rgba(200,167,72,.25); }
+.bv-btn-del {
+  padding: 9px 18px;
+  background: rgba(180,40,40,.1);
+  border: 1px solid rgba(180,40,40,.3);
+  border-radius: 10px; color: #d45050;
+  font-family: 'EB Garamond', serif; font-size: 14px;
+  cursor: pointer; transition: all .18s;
+}
+.bv-btn-del:hover { background: rgba(180,40,40,.25); }

@@ -35,6 +35,7 @@ function openBookViewer(book) {
 }
 
 function _openViewer(book) {
+  _setViewerBook(book);
   document.getElementById('bv-title').textContent  = book.title;
   document.getElementById('bv-author').textContent = book.author + (book.pages ? '  ·  ' + book.pages + ' pág.' : '');
   document.getElementById('bv-overlay').classList.add('open');
@@ -161,3 +162,62 @@ function vOnMv(e)  { if (!_vDrag) return; _vRotY += (e.clientX - _vStartX) * 0.0
 function vOnUp()   { _vDrag = false; }
 function vOnTDn(e) { e.preventDefault(); _vDrag = true; _vStartX = e.touches[0].clientX; _vAutoR = false; }
 function vOnTMv(e) { e.preventDefault(); if (!_vDrag) return; _vRotY += (e.touches[0].clientX - _vStartX) * 0.008; _vStartX = e.touches[0].clientX; }
+
+/* ══════════════════════════════════════════════════
+   ACCIONES DEL VISOR
+══════════════════════════════════════════════════ */
+
+var _vBook = null;   // libro actualmente en el visor
+
+/** Guarda referencia al libro y actualiza botones de estado */
+function _setViewerBook(book) {
+  _vBook = book;
+  var status = book.status || 'pendiente';
+  document.querySelectorAll('.bv-st-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.s === status);
+  });
+}
+
+/** Cambia el estado del libro desde el visor */
+function bvSetStatus(newStatus) {
+  if (!_vBook) return;
+  _vBook.status = newStatus;
+
+  // Actualizar botones
+  document.querySelectorAll('.bv-st-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.s === newStatus);
+  });
+
+  // Reconstruir lomo (tiene la franja de color de estado)
+  if (_vBook.mesh) {
+    var pos = _vBook.mesh.position.clone();
+    var rot = _vBook.mesh.rotation.clone();
+    var sh  = _vBook.mesh.castShadow;
+    sc.remove(_vBook.mesh);
+    buildMesh(_vBook);
+    _vBook.mesh.position.copy(pos);
+    _vBook.mesh.rotation.copy(rot);
+    _vBook.mesh.castShadow = sh;
+    sc.add(_vBook.mesh);
+    markShadowDirty();
+  }
+
+  persist();
+  updStats();
+  sndPlace && sndPlace();
+}
+
+/** Abre el modal de edición desde el visor */
+function bvEdit() {
+  if (!_vBook) return;
+  closeBookViewer();
+  setTimeout(function() { openEditModal(_vBook.id); }, 200);
+}
+
+/** Elimina el libro desde el visor */
+function bvDelete() {
+  if (!_vBook) return;
+  var id = _vBook.id;
+  closeBookViewer();
+  setTimeout(function() { deleteBook(id); }, 200);
+}
