@@ -11,7 +11,7 @@
 // En local: 'http://localhost:3001'
 // En Railway: 'https://tu-app.up.railway.app'
 
-const API_URL = 'https://bookjar-backend.up.railway.app';
+const API_URL = 'https://3d-journal-production.up.railway.app';
 
 
 var _token     = null;   // JWT guardado en localStorage
